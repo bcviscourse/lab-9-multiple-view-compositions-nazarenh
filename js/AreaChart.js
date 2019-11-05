@@ -33,7 +33,7 @@ export default function AreaChart(){
             
             gEnter.append("path");// path container (order matters)
             gEnter.append("g").attr("class", "x-axis axis"); // x-axis container
-            gEnter.append("g").attr("class", "y-axis axis"); // x-axis container
+            gEnter.append("g").attr("class", "y-axis axis"); // y-axis container
             gEnter.append("defs").append("clipPath")
                 .attr("id", "clip")
                 .append("rect")
@@ -71,11 +71,28 @@ export default function AreaChart(){
             .attr("d", area);
             
 
+            
+
+
+
             // initialize zooming
-            if (zooming){
+if (zooming){
                 // Activity II. TODO
-            }else{
+
+                var zoom = d3.zoom()
+                    .scaleExtent([1, 8])  // This control how much you can unzoom (x0.5) and zoom (x20)
+                    // .translateExtent([0,0], [innerWidth, innerHeight])
+                    .extent([[0, 0], [innerWidth, innerHeight]])
+                    .on("zoom", handleZoom);
+
+                
+                let svg = d3.select(this);
+                svg
+                    .call(zoom)
+
+}else{
                 // Activity II. TODO
+                svg.on(".zoom", null);
                 
             }
 
@@ -132,15 +149,40 @@ export default function AreaChart(){
         curve = _;
         return chart;
     };
-    
+
+    chart.on = function(eventName, callback) {
+        if (!arguments.length) return listeners;
+        listeners.on(eventName, callback);
+        return chart;
+    };
 
     function handleZoom(){
         // Activity II. TODO: update xScale's range, the area path, and x-axis
+        // console.log("zooming");
+    //     let svg = d3.select(this);
+    //     let [r1,r2]= [0,0];
+    //     [r1,r2] =[0, innerWidth].map(d => d3.event.transform.applyX(d));
 
+    //     xScale.range([r1,r2])
+    //     xAxis.scale(xScale);
+    //     svg.select('.x-axis').call(xAxis);
+    //     svg.select('path').attr("d", area);
 
        
-        // Activity III. TODO: call registered listeners for your custom 'zooomed' event
+    //     // Activity III. TODO: call registered listeners for your custom 'zooomed' event
+    //    let rescaleX = d3.event.transform.rescaleX(xScale)
        
+    //     listeners.apply("zoomed", this, [[rescaleX(0), rescaleX.domain()]]);
+        let innerWidth = width - margin.left - margin.right;
+        let innerHeight = height- margin.top - margin.bottom;
+        xScale.range([0, innerWidth].map(d => d3.event.transform.applyX(d)) );
+
+        let svg = d3.select(this);
+        svg.select('x.axis').call(xAxis);
+        svg.select('path').attr('d', area); 
+
+        let rescaleX = d3.event.transform.rescaleX(xScale);
+        listeners.apply('zoomed', this, [rescaleX.domain()]);
 
     }
     

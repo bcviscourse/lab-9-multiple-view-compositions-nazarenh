@@ -1,3 +1,7 @@
+function print(x){
+    console.log(x);
+}
+
 
 export default function BarChart(){
     // default size
@@ -6,7 +10,7 @@ export default function BarChart(){
     let height = 250;
     
     // Scales and axes
-    let xScale = d3.scaleBand().paddingInner(0.05),
+    let xScale = d3.scaleBand().paddingInner(0.05), //changed from d3.scaleBand().paddingInner(0.05)
     yScale = d3.scaleLinear(),
     xAxis = d3.axisBottom().scale(xScale),
     yAxis = d3.axisLeft().scale(yScale);
@@ -38,18 +42,64 @@ export default function BarChart(){
             let g = svg.select("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
             
-            if (layout==='horizontal'){
+        if (layout==='horizontal'){
                 // Activity I. TODO: update scales and axes
-   
+                xScale.domain(data.map(xValue) )
+                    .range([0, innerWidth]);
 
+                yScale.domain(d3.extent(data, function(d){return d.votes}) )
+                    .range([innerHeight,0]);
+
+                xAxis.scale(xScale);
+                yAxis.scale(yScale);
+                
                 // Activity I. TODO: draw bars
+                svg.selectAll(".bar")
+                    .data(data)
+                    .join('rect')
+                    // .enter().append("rect")
+                    .attr("class","bar")
+                    .attr("x", function(d,i){return margin.left+xScale(d.age);})
+                    .attr("y", function(d,i){return yScale(d.votes);})
+                    .attr("width", 3)
+                    .attr("height", function(d){return height- margin.top - margin.bottom-yScale(d.votes);})
+                    .attr("fill", "orange")
               
-            }else{
+        }else{
                 // Activity I. TODO: update scales and axes
-   
+                let nxScale = d3.scaleLinear(); 
+                let nyScale = d3.scaleBand().paddingInner(0.05);
+                let titles = [];
+                data.forEach(function(d){
+                    titles.push(d.title);
+                });
+                // print(titles);
+                nyScale.domain(titles) //this will be y-axis
+                    .range([0, height - margin.bottom]);
+
+                nxScale.domain(d3.extent(data, function(d){
+                    return d.votes}) )
+                    .range([0, margin.left]);
+
+                xAxis.scale(nxScale);
+                yAxis.scale(nyScale);
 
                 // Activity I. TODO: draw bars
-            }
+                let bars = svg.selectAll(".bar")
+                    .data(data)
+                    .join('rect')
+                    // .enter().append("rect")
+                    .attr("class","bar")
+                    .attr("x", margin.left)
+                    .attr("y", function(d,i){return nyScale(d.title);})
+                    .attr("width", function(d){
+                        // print(d);
+                        return nxScale(d.votes)+50;})
+                    .attr("height", 12)
+                    .attr("fill", "orange")
+
+                bars.exit().remove();
+        }
 
             // Append x-axis
             g.select('.x-axis')
